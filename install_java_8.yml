@@ -1,0 +1,4 @@
+- hosts: KAFKA-AWS
+  any_errors_fatal: true
+  roles:
+    - role: root_install_java_8

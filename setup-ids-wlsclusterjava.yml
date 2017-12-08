@@ -1,0 +1,41 @@
+#install java and weblogic 
+- hosts: calc_servers
+  any_errors_fatal: true
+  roles: 
+    - role: install_java
+#instal weblogic server 
+- hosts: calc_servers
+  any_errors_fatal: true
+  roles:
+    - { role: install_wlscluster , tags: ['install'],skip-tags: ['createdomain','unpack','enroll'] }
+#Create Weblogic Domain
+- hosts: admin_servers
+  any_errors_fatal: true
+  roles:
+    - { role: install_wlscluster , tags: ['createdomain'],skip-tags: ['unpack','enroll'] }
+#unpack weblogic domain in other server
+- hosts: secondary_calc
+  any_errors_fatal: true
+  roles:
+    - { role: install_wlscluster , tags: ['unpack'],skip-tags: ['createdoamin','enroll'] }
+#Start ids doamin Admin server
+- hosts: admin_servers
+  any_errors_fatal: true
+  tasks:
+#    - include: roles/install_wlscluster/common/tasks/start_admin_server.yml
+#enroll node manager server
+- hosts: calc_servers
+  any_errors_fatal: true
+  roles:
+    - { role: install_wlscluster , tags: ['enroll'],skip-tags: ['createdomain','unpack'] }
+#start Managed servers
+- hosts: calc_servers
+  any_errors_fatal: true
+  tasks:
+    - include: roles/install_wlscluster/common/tasks/create_managed_server_script.yml
+    - include: roles/install_wlscluster/common/tasks/start_managed_servers.yml
+#Create DB Resources in weblogic
+- hosts: admin_servers
+  any_errors_fatal: true
+  roles:
+    - { role: install_wlscluster , tags: ['DBresourcecreation'],skip-tags: ['install','createdomain','unpack','enroll'] }

@@ -1,0 +1,8 @@
+- hosts: MQ
+  any_errors_fatal: true
+  pre_tasks:
+    - include_vars: /local/apps/ids/SPDJIEnvironmentSetup/ansible/hots/group_vars/artemis_vars
+    - include_vars: /local/apps/ids/SPDJIEnvironmentSetup/ansible/hots/group_vars/java_vars
+  roles:
+    - role: spdji_install_java
+    - role: spdji_install_activemq_artemis

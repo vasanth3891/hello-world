@@ -1,0 +1,3 @@
+- hosts: dplyr_server_hosts
+  roles:
+    - deploy_r_server

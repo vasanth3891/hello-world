@@ -1,0 +1,26 @@
+# Print enviornment details
+- hosts: primary_calc
+  pre_tasks:
+     - include_vars: environments/IDS/DEV/group_vars/aws_vars.yml
+  tasks:
+    - name: Print environnment details
+      debug:
+        msg: "This will configure IDS in {{ ids_env_name }} environment. Following are the servers: {{ all_servers_in }}"
+
+# Get confirmation from user before continue
+- hosts: primary_calc
+  vars_prompt:
+    - name: "is_continue"
+      prompt: "Do you want to continue (Y/N)?"
+      default: "N"
+      private: no
+  tasks:
+    - name: Exit if user does not want to continue
+      fail: msg="User does not  want to continue, exiting play - {{ is_continue }}"
+      when: is_continue | upper != "Y"
+
+# Install Java and WebLogic in all servers
+- hosts: managed_servers
+  any_errors_fatal: true
+  roles:
+    - role: install_java

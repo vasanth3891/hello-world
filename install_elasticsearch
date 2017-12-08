@@ -1,0 +1,5 @@
+- hosts: elastic_search_hosts
+  roles:
+        
+    - install_elastic_search
+

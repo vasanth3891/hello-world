@@ -1,0 +1,3 @@
+- hosts: apache_hosts
+  roles:
+    - install_sample

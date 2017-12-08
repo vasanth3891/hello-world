@@ -1,0 +1,21 @@
+find ./ansible -type d -name "all" -exec echo ln -s /local/apps/idsuser/ansible/environments/cross_env_vars.yml {} \;
+
+find ./ansible/environments/lower -type d -name "all" -exec echo ln -s /local/apps/idsuser/ansible/environments/lower_env_vars.yml {} \;
+
+find ./ansible/environments/production -type d -name "all" -exec echo ln -s /local/apps/s/ansible/environments/prod_env_vars.yml {} \;
+
+If you want to start executing your playbook at a particular task, you can do so with the --start-at-task option: 
+
+ansible-playbook setup-ids.yml --start-at-task="Add Java home to path"
+
+TODO
+1. quartz-client.properties registryHost in production should be CALC SERVER 1, this is not setup
+
+Enable fact caching:
+
+gathering = smart
+fact_caching = jsonfile
+fact_caching_connection = /local/apps/idsuser/ansible/fact_cache
+fact_caching_timeout = 86400
+
+ansible all -m setup

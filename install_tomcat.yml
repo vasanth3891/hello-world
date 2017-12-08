@@ -1,0 +1,4 @@
+- hosts: Appserver
+  any_errors_fatal: true
+  roles:
+    - role: install_tomcat

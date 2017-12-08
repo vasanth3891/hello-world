@@ -1,0 +1,5 @@
+- hosts: blogs_hosts
+  become: yes
+  roles:
+    - install_php_blogs
+

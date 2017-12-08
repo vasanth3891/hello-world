@@ -1,0 +1,3 @@
+- hosts: hazel_cast_hosts
+  roles:
+    - install_hazel_cast

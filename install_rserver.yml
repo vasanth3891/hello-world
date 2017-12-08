@@ -1,0 +1,5 @@
+- hosts: r_server_hosts
+  become: yes
+  roles:
+    - install_r_server
+

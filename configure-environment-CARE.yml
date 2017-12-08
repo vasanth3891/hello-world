@@ -1,0 +1,15 @@
+- hosts: AWS
+  any_errors_fatal: true
+  pre_tasks:
+    - include_vars: /local/apps/idsuser/SPDJIEnvironmentSetup/ansible/environments/cross_env_vars.yml
+    - include_vars: /local/apps/idsuser/SPDJIEnvironmentSetup/ansible/environments/CARE/main.yml
+    - include_vars: /local/apps/idsuser/SPDJIEnvironmentSetup/ansible/environments/CARE/DEV/group_vars/main.yml
+  roles:
+#    - role: care_setup_profile
+#    - role: spdji_install_java
+#    - role: spdji_install_wls
+    - role: care_create_wl_domain
+#    - role: care_setup_apache_httpd
+#    - role: spdji_idm11g
+#    - role: care_configure_idm11g
+#    - role: care_create_data_sources
