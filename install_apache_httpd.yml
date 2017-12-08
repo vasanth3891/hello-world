@@ -1,0 +1,4 @@
+- hosts: WEB_SERVERS
+  any_errors_fatal: true
+  roles:
+    - role: root_install_apache_httpd
