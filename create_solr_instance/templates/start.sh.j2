@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo "Starting Solr Instance listening to port {{ solr_port }}"
+
+./solr start -c -s {{ solr_instance }}/data -p {{ solr_port }}
+

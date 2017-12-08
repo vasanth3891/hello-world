@@ -1,0 +1,7 @@
+# Install Java and WebLogic in all servers
+- hosts: solr_hosts
+  any_errors_fatal: true
+  roles:
+    - role: install_java
+    - role: install_solr
+    - role: create_solr_instance

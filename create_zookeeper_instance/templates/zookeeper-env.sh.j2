@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+ZOOSRC="{{ zookeeper_installation }}"
+
+#add the zoocfg dir to classpath
+CLASSPATH="$ZOOSRC:$CLASSPATH"
+
+for i in "$ZOOSRC"/src/java/lib/*.jar
+do
+    CLASSPATH="$i:$CLASSPATH"
+done
+
+#make it work in the binary package
+#(use array for LIBPATH to account for spaces within wildcard expansion)
+if [ -e "${ZOOSRC}"/share/zookeeper/zookeeper-*.jar ]; then
+  LIBPATH=("${ZOOSRC}"/share/zookeeper/*.jar)
+else
+  #release tarball format
+  for i in "$ZOOSRC"/zookeeper-*.jar
+  do
+    CLASSPATH="$i:$CLASSPATH"
+  done
+  LIBPATH=("${ZOOSRC}"/lib/*.jar)
+fi
+
+for i in "${LIBPATH[@]}"
+do
+    CLASSPATH="$i:$CLASSPATH"
+done
+
+#make it work for developers
+for d in "$ZOOSRC"/build/lib/*.jar
+do
+   CLASSPATH="$d:$CLASSPATH"
+done
+
+#make it work for developers
+CLASSPATH="$ZOOSRC/build/classes:$CLASSPATH"
+
+case "`uname`" in
+    CYGWIN*) cygwin=true ;;
+    *) cygwin=false ;;
+esac
+
+if $cygwin
+then
+    CLASSPATH=`cygpath -wp "$CLASSPATH"`
+fi
+

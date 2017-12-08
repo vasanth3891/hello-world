@@ -1,0 +1,48 @@
+---
+- name: Create SOLR installation directory
+  file:
+    path: "{{ executable_dir }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+
+#- name: Extract SOLR executables
+#  unarchive:
+#    src: "{{ solr_file_name }}"
+#    dest: "{{ executable_dir }}"
+
+- name: Download SOLR executables
+  get_url:
+    url: "{{ solr_download_url }}"
+    dest: "{{ user_home }}"
+    mode: "{{ folder_permissioin }}"
+
+#Extracting from local host
+- name: Extracting SOLR executables
+  unarchive:
+       src: "{{ user_home }}/{{ solr_file_name }}"
+       dest: "{{ executable_dir }}"
+       remote_src: yes
+  register: solr_Extracted
+
+#- name: Extract SOLR executables
+#  command: tar -xvf {{ user_home }}/{{ solr_file_name }} -C {{ executable_dir }}
+
+- name: Add ODBC library to DHI library folder
+  copy:
+    src: "{{ odbc_lib_file }}"
+    dest: "{{ solr_dh_lib }}"
+
+- name: Update Java Home in solr script
+  lineinfile:
+    name: "{{ solr_installation }}/bin/solr.in.sh"
+    regexp: '^SOLR_JAVA_HOME'
+    insertafter: '^#SOLR_JAVA_HOME'
+    line: 'SOLR_JAVA_HOME={{ java_home }}'
+
+- name: Update Java Home in zkcli script
+  lineinfile:
+    name: "{{ solr_installation }}/server/scripts/cloud-scripts/zkcli.sh"
+    regexp: '^JAVA_HOME'
+    insertbefore: '^JVM='
+    line: 'JAVA_HOME={{ java_home }}'
+...

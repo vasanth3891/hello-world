@@ -1,0 +1,41 @@
+[zk_hosts]
+#nj09mhf10155.mhf.mhc   ansible_user=solr   zookeeper_server_id=1
+#nj09mhf10154.mhf.mhc   ansible_user=solr   zookeeper_server_id=2
+
+#Dev Zookeeper hosts
+#10.164.242.157   ansible_user=solr   zookeeper_server_id=1
+#10.164.242.174   ansible_user=solr   zookeeper_server_id=2
+#10.164.242.179   ansible_user=solr   zookeeper_server_id=3
+
+#QA Zookeeper hosts
+10.164.236.112    ansible_user=solr   zookeeper_server_id=1
+10.164.236.128    ansible_user=solr   zookeeper_server_id=2
+10.164.236.188    ansible_user=solr   zookeeper_server_id=3
+
+[solr_primary_host]
+#DEV solr host
+#10.164.242.220    ansible_user=solr
+
+#QA Solr Host
+10.164.236.16    ansible_user=solr
+
+[solr_secondary_host]
+#10.164.241.114   ansible_user=solr
+#10.164.241.54    ansible_user=solr
+#10.164.241.72    ansible_user=solr
+
+#Dev Solr Hosts
+#10.164.242.223    ansible_user=solr
+#10.164.242.239    ansible_user=solr
+
+#QA Solr Hosts
+10.164.236.20    ansible_user=solr
+10.164.236.63    ansible_user=solr
+
+[solr_hosts:children]
+solr_primary_host
+solr_secondary_host
+
+[all_nodes:children]
+zk_hosts
+solr_hosts

@@ -1,0 +1,10 @@
+---
+- name: Create zookeeper instance data directory
+  file:
+    path: "{{ zookeeper_instance }}/zkdata/server-{{ item.name }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes  }}"
+...

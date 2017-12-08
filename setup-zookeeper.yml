@@ -1,0 +1,7 @@
+# Install Java and WebLogic in all servers
+- hosts: zk_hosts
+  any_errors_fatal: true
+  roles:
+    - role: install_java
+    - role: install_zookeeper
+    - role: create_zookeeper_instance

@@ -1,0 +1,92 @@
+---
+- name: Create zookeeper instance directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ zookeeper_instance }}"
+    - "{{ zookeeper_instance }}/bin"
+    - "{{ zookeeper_instance }}/conf"
+    - "{{ zookeeper_instance }}/zkdata"
+
+- name: Create zookeeper instance data directory
+  file:
+    path: "{{ zookeeper_instance }}/zkdata/server-{{ item.name }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes }}"
+
+- name: Copy static config files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ zookeeper_instance }}/conf"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "log4j.properties"
+    - "configuration.xsl"
+
+- name: Copy executable scripts
+  copy:
+    src: "{{ zookeeper_installation }}/bin/{{ item }}"
+    dest: "{{ zookeeper_instance }}/bin"
+    mode: "{{ folder_permission }}"
+    remote_src: True
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "zkServer.sh"
+    - "zkEnv.sh"
+    - "zkCli.sh"
+    - "zkCleanup.sh"
+
+- name: Copy environment files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ zookeeper_instance }}/conf/{{ item }}"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "zookeeper-env.sh"
+    - "java.env"
+
+- name: Copy configuration file
+  template:
+    src: "zoo_sample.cfg.j2"
+    dest: "{{ zookeeper_instance }}/conf/zoo.server.{{ item.name }}.cfg"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes }}"
+
+- name: Copy Start script file
+  template:
+    src: "start.sh.j2"
+    dest: "{{ zookeeper_instance }}/bin/start-{{ item.name }}.sh"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes }}"
+
+- name: Copy Stop script file
+  template:
+    src: "stop.sh.j2"
+    dest: "{{ zookeeper_instance }}/bin/stop-{{ item.name }}.sh"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes }}"
+
+
+- name: Copy id file
+  template:
+    src: "myid.j2"
+    dest: "{{ zookeeper_instance }}/zkdata/server-{{ item.name }}/myid"
+    mode: "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ nodes }}"
+...

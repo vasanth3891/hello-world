@@ -1,0 +1,15 @@
+solr_version: "6.5.1"
+solr_file_name: "solr-{{ solr_version }}.tgz"
+solr_installation: "{{ executable_dir }}/solr-{{ solr_version }}"
+solr_dh_lib: "{{ solr_installation }}/contrib/dataimporthandler-extras/lib"
+solr_instance: "{{ user_home }}/solr_cloud"
+solr_port: 8983
+
+odbc_lib_file: "ojdbc6.jar"
+java_memory: "-Xms2048m -Xmx4096m"
+
+solr_download_url: "https://artifactory-use-prod.cicd.spglobal.com/artifactory/spdji-generic-virtual/tars/{{ solr_file_name }}"
+
+solr_deploy:  "{{user_home}}/deploy_solr_cloud"
+solr_dev_deploy_file_name: "solr-cloud-1.0-AWS-DEV-10-31-2017.tar"
+solr_qa_deploy_file_name: "solr-cloud-1.0-AWS-QA-10-31-2017.tar"

@@ -1,0 +1,10 @@
+# Install Java and WebLogic in all servers
+- hosts: solr_hosts
+  any_errors_fatal: true
+  
+- include: setup-zookeeper.yml
+
+- include: setup-solr.yml
+
+- include: setup-solr-deploy.yml
+

@@ -1,0 +1,27 @@
+---
+- name: Create zookeeper installation directory
+  file:
+    path: "{{ executable_dir }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+
+#- name: Extract ZooKeeper executables
+#  unarchive:
+#    src: "{{ zookeeper_file_name }}"
+#    dest: "{{ executable_dir }}"
+
+- name: Download ZooKeeper executables
+  get_url:
+    url: "{{ zookeeper_download_url }}"
+    dest: "{{ user_home }}"
+    mode: "{{ folder_permission }}"
+
+#Extracting from local host
+- name: Extracting Zookeeper executables
+  unarchive:
+        src: "{{ user_home }}/{{ zookeeper_file_name }}"
+        dest: "{{ executable_dir }}"
+        remote_src: yes
+  register: Zookeeper_Extracted
+  
+...

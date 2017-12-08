@@ -1,0 +1,5 @@
+# Install Java and WebLogic in all servers
+- hosts: all_nodes
+  any_errors_fatal: true
+  roles:
+    - role: install_java

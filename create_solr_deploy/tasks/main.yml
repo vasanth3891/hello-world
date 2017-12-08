@@ -1,0 +1,27 @@
+---
+- name: Create SOLR deployment directory
+  file:
+    path: "{{ solr_deploy }}"
+    state: directory
+    mode: "{{ folder_permission }}"
+
+- name: Copy deploy tar
+  copy:
+    src: "{{ solr_qa_deploy_file_name }}"
+   #src: "{{ solr_dev_deploy_file_name }}"
+    dest: "{{ solr_deploy }}"
+    mode: "{{ folder_permission }}"
+
+- name: Extract SOLR deploy tar
+  unarchive:
+   #src: "{{ solr_dev_deploy_file_name }}"
+    src: "{{ solr_qa_deploy_file_name }}"
+    dest: "{{ solr_deploy }}"
+
+- name: Configure create and deploy_solr_cloud_collections.sh
+  shell: "{{item}}"
+  args:
+    chdir: "{{solr_deploy}}/bin"
+  with_items:
+      - ./create_solr_cloud_collections.sh
+      - ./deploy_solr_cloud_collections.sh

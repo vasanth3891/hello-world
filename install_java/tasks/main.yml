@@ -1,0 +1,23 @@
+---
+- name: Create required directories for JDK installation
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode:  "{{ folder_permission }}"
+  when: not(( "{{item}}" is undefined) or ( "{{item}}" is none) or ( "{{item}}" | trim==''))
+  with_items:
+      - "{{ downloads_dir }}"
+      - "{{ executable_dir }}"
+
+- name: Downloading Java jdk1.8.0_131
+  get_url:
+    url: "{{ java_download_url }}"
+    dest: "{{ downloads_dir }}"
+    mode: "{{ folder_permission }}"
+
+- name: Extract java installation
+  unarchive:
+    src: "{{ downloads_dir }}/{{ java_file_name }}"
+    dest: "{{ executable_dir }}"
+    remote_source: yes
+...

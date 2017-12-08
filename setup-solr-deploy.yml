@@ -1,0 +1,4 @@
+-  hosts: solr_primary_host
+   any_errors_fatal: true
+   roles:
+     - role: create_solr_deploy
