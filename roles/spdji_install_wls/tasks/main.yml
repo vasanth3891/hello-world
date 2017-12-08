@@ -1,0 +1,37 @@
+- name: Create required directories to install WLS
+  file:
+    path:  "{{ item }}"
+    state: directory
+    mode:  "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ middleware_home }}"
+    - "{{ oracle_inventory_home }}"
+    - "{{ weblogic_tmp_location }}"
+
+- name: Create silent WL install file
+  template:
+    src:  silent_weblogic_txt.j2
+    dest: "{{ silent_install_file }}"
+    mode: "{{ file_permission }}"
+  register: silent_install_file_created
+
+- name: Create oraInst.loc
+  template:
+    src:  ora_inst_loc.j2
+    dest: "{{ ora_inst_loc }}"
+    mode: "{{ file_permission }}"
+  register: orainst_loc_created
+
+- name: Copy WL installable to host
+  copy: 
+    src:   "{{ weblogic_file_name }}"
+    dest:  "{{ weblogic_installer }}"
+    mode:  "{{ file_permission }}"
+    force: no
+
+- name: Install WebLogic server
+  shell: "{{ java }} -Xms1024m -Xmx1024m -Djava.io.tmpdir={{ weblogic_tmp_location }} -jar {{ weblogic_installer }} -silent -responseFile {{ silent_install_file }} -invPtrLoc {{ ora_inst_loc }} >> {{ wl_install_log }} 2>&1"
+  args:
+    creates: "{{ wlst_sh }}"
+  when: silent_install_file_created|success and orainst_loc_created|success

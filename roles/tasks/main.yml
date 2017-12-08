@@ -1,0 +1,26 @@
+- name: Create required directories
+  file: 
+    path: "{{item}}"
+    state: directory
+    mode: "{{folder_permission}}"
+  when: not( ("{{item}}" is undefined) or ("{{item}}" is none) or ("{{item}}" | trim==''))
+  with_items:
+    - "{{es_home}}"
+    - "{{es_temp_dir}}"
+    - "{{es_data_dir}}"
+    - "{{es_log_dir}}"
+    
+- name: Extract elasticsearch archive
+  unarchive:
+    src: "{{es_file_name}}"
+    dest: "{{es_home}}"
+  register: elasticsearch_installed
+- name: Conf file for ElasticSearch
+  template:
+    src: elasticsearch.yml.j2
+    dest: "{{es_conf_dir}}/elastisearch"
+  when: elasticsearch_installed | success
+- name: Start elasticsearch
+  shell: "nohup sh {{ es_starting }} >nohup.out 2>&1 &"
+  args:
+    chdir: "{{ es_start_script_dir }}"
