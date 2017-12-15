@@ -1,0 +1,19 @@
+home_dir:		"/home/informat"
+filelist_dir:		"{{home_dir}}/UFF_Filelists"
+log_dir:		"{{home_dir}}/log"
+folder_permission:      "u=rwx,g=rwx,o=rx"
+owner_name:		"informat"
+group_name:		"infoapp"
+informatica_value:      "IS_DEVAWS213" #Value change when new VM procured
+infadomain_value:	"" #Value change when new VM procured
+infarep_value:		"IDPDEVREP" #user change
+pmhome_value:		"/nas/spice"
+infa_user:		"informat"
+infa_pass:		"" #user change
+db_user:		"infaapp"
+db_pass:		"" #user change
+db_env:			"" #user change
+pkg_path:		"{{home_dir}}/software/jasypt/jasypt-1.9.2"
+script_path:		"{{home_dir}}/software/custom/scripts"
+gdb_path:		"" #user change
+java_path:		"/ORACLE_HOME/jdk"

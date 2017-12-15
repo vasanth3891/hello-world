@@ -1,0 +1,20 @@
+ids_app_user:                          "idsuser"
+ids_app_user_group:                     "idsgrp"
+ids_home_directory:                     "/local/apps/{{ ids_app_user }}"
+bash_profile_file:                     "{{ ids_home_directory }}/.bash_profile"
+bashrc_file:                           "{{ ids_home_directory }}/.bashrc"
+
+wls_plugin_file:                       "WLSPlugin12.2.1.2.0-Apache2.2-Apache2.4-Linux_x86_64-12.2.1.2.0.zip"
+wls_plugin_file_dest:                  "/etc/httpd/modules"
+wls_plugin_file_dest_zip:              "/etc/httpd/modules/"
+ld_so_conf_file:                       "/etc/ld.so.conf"
+apache_package:                        httpd
+apache_service:                        httpd
+httpd_ServerRoot:                      '/etc/httpd'
+httpd_Listen:                          "3400"
+httpd_DocumentRoot:                    '/var/www/html'
+httpd_config:                          "/etc/httpd/conf/httpd.conf"
+mod_wl_so_file:                        "/usr/lib64/httpd/modules/mod_wl.so"
+weblogic_config:                       "/etc/httpd/conf.d/weblogic.conf"
+file_permission:                       "u=rwx,g=r,o=r"
+folder_permission:                     "u=rwx,g=rx,o=rx"

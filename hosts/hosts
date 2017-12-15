@@ -1,0 +1,68 @@
+[etl_hosts]
+
+[blogs_hosts]
+#10.164.241.14  ansible_user=blogs document_root_path="/blogs/indexologyblog" --terminated
+#10.164.241.7   ansible_user=blogs document_root_path="/blogs/housingviews"   -- terminated
+#10.164.241.42   ansible_user=blogs document_root_path="/blogs/spvixviews"
+#10.164.241.95   ansible_user=blogs document_root_path="/blogs/trucost"       -- terminated
+
+
+[r_server_hosts]
+#DEV
+#10.164.242.222          ansible_user=webutils
+
+#QA
+#10.164.236.48           ansible_user=webutils
+
+[dplyr_server_hosts]
+#DEV
+#10.164.242.222          ansible_user=webutils
+
+#QA
+#10.164.236.48           ansible_user=webutils
+
+[apache_php]
+#10.164.240.38     ansible_user=ids
+
+[hazel_cast_hosts]
+#10.164.241.105  ansible_user=ids
+
+[elastic_search_hosts]
+#10.164.241.105  ansible_user=ids
+
+[apache_hosts]
+#nj09mhf10154.mhf.mhc   ansible_user=idsuser
+#nj09mhf10153.mhf.mhc   ansible_user=idsuser
+
+[weblogic_hosts]
+#nj09mhf10154.mhf.mhc   ansible_user=idsuser
+#nj09mhf10153.mhf.mhc   ansible_user=idsuser
+
+[all_nodes:children]
+apache_hosts
+weblogic_hosts
+
+[spark_hosts]
+#DEV
+#10.164.242.115         ansible_user=webutils
+
+#QA
+10.164.236.177          ansible_user=webutils
+
+[MQ_MASTER]
+#DEV
+10.164.242.158   ansible_user=webutils
+
+#QA
+#10.164.236.39   ansible_user=webutils
+
+[MQ_SLAVE]
+#DEV
+10.164.242.214    ansible_user=webutils
+
+#QA
+#10.164.236.211   ansible_user=webutils
+
+[MQ:children]
+MQ_MASTER
+MQ_SLAVE

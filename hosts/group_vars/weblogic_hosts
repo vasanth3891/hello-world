@@ -1,0 +1,8 @@
+solr_version: "6.5.0"
+solr_file_name: "solr-{{ solr_version }}.tgz"
+solr_installation: "{{ executable_dir }}/solr-{{ solr_version }}"
+solr_dh_lib: "{{ solr_installation }}/contrib/dataimporthandler-extras/lib"
+solr_instance: "{{ user_home }}/solr_cloud"
+
+odbc_lib_file: "ojdbc6.jar"
+java_memory: "-Xms2048m -Xmx4096m"

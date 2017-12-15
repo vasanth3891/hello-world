@@ -1,0 +1,13 @@
+file_name:		"httpd24-httpd-manual-2.4.6-5.el6.noarch.rpm"
+home_path:		"/local/apps/idsuser"
+apache_home:		"{{home_path}}/apache_php"
+folder_permission:      "u=rwx,g=rx,o=rx"
+httpd_port:  		"80"
+Document_root: 		"/var/www/html"
+index_php_file: 	"{{ Document_root }}/index.php"
+httpd_root:    		"/etc/httpd"
+httpd_config:  		"{{ httpd_root }}/conf/httpd.conf"
+file_permission:	"u=rwx,g=r,o=r"
+repos_dir:              "/etc/yum.repos.d"
+
+
