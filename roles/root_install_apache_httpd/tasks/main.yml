@@ -1,0 +1,9 @@
+- name: Greeting
+  debug:
+    msg: "Installing Apache HTTPD"
+
+- name: Let's go
+  become: yes
+  become_user: root
+  become_method: sudo
+  yum: name=httpd state=latest
