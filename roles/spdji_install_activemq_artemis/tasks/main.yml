@@ -1,0 +1,187 @@
+
+- name: Print info
+  debug:
+    msg: "This will setup Active MQ Artemis in {{  app_home_directory }} with home {{ activemq_artemis_home }}"
+
+- name: Adding variables for slave dynamically
+  set_fact:
+    broker_name: "slave"
+    broker_marker: "--slave"
+    connector_name: "master"
+  when: inventory_hostname in groups['MQ_SLAVE']
+
+# initially JAVA YML file Creates a download directory.
+
+- name: Downloading Active MQ Artemis
+  get_url:
+    url: "{{ activemq_url }}"
+    dest: "{{ downloads_dir }}"
+    mode: "{{ folder_permission }}"
+
+- name: Extracting Active MQ Artemis
+  unarchive:
+       src: "{{ downloads_dir }}/{{ activemq_artemis_tar_file_name }}"
+       dest: "{{ app_home_directory }}"
+       creates: "{{ activemq_artemis_home }}"
+       remote_src: yes
+  register: ActiveMQArtemis_Extracted
+
+- name: Setting up Master and Slave brokers.
+  environment:
+    ARTEMIS_HOME: "{{ activemq_artemis_home }}"
+    BROKER_HOME: "{{ broker_home }}"
+    JAVA_HOME: "{{ activemq_artemis_java_home }}"
+    BROKER_PORT: "{{ activemq_artemis_broker_port }}"
+    BROKER_NAME: "{{ broker_name }}"
+    BROKER_MASTER_SLAVE_MARK: "{{ broker_marker }}"
+    MY_HOST: "{{ inventory_hostname }}"
+  script: setup_broker.sh
+
+#- name: Disabling inactivity monitor for Master broker and Slave broker
+#  replace:
+#    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+#    regexp: '{{ activemq_artemis_broker_port }}<'
+#    replace: "{{ activemq_artemis_broker_disable_inactivity_monitor }}"
+
+- name: Setting up DLQ plugin for Master and Slave
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    insertbefore: '   <jms xmlns="urn:activemq:jms">'
+    block: |
+            <plugins>
+                <discardingDLQBrokerPlugin dropAll="true" dropTemporaryTopics="true" dropTemporaryQueues="true"/>
+            </plugins>
+    marker: "<!-- {mark} Plugins added by Ansible -->"
+
+- name: Adding Temporary config for Thread Pool size for Master and Slave
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    insertbefore: '<connectors>'
+    content: |
+              <thread-pool-max-size>60</thread-pool-max-size>
+              <scheduled-thread-pool-max-size>10</scheduled-thread-pool-max-size>
+    marker:   <!-- Temporary config for Thread Pool size -->
+
+- name: Adding static connector for Master and Slave
+  blockinfile:
+     dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+     insertafter: "<!-- Connector used to be announced through cluster connections and notifications -->"
+     content: |
+               <connector name="{{ connector_name }}-connector">tcp://{{ item }}:9876</connector>
+     marker: '<!-- Added by Ansible -->'
+  with_items: "{{ groups['MQ'] }}"
+  when: inventory_hostname != "{{ item }}"
+
+- name: Setting up JMX remote access for Master and Slave
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/bin/artemis"
+    insertbefore: '    \$DEBUG_ARGS \\'
+    block: |
+      -Dcom.sun.management.jmxremote \
+      -Dcom.sun.management.jmxremote.port={{ activemq_artemis_broker_jmxremote_port }} \
+      -Dcom.sun.management.jmxremote.local.only=false \
+      -Dcom.sun.management.jmxremote.authenticate=true \
+      -Dcom.sun.management.jmxremote.access.file={{ app_home_directory }}/.jmxremote.access \
+      -Dcom.sun.management.jmxremote.password.file={{ app_home_directory }}/.jmxremote.password \
+      -Dcom.sun.management.jmxremote.ssl=false \
+    marker: '-D{mark}="Added by Ansible" \'
+
+- name: Copy JMX control file 1
+  copy:
+    src: "dot.jmxremote.access"
+    dest: "{{ app_home_directory }}/.jmxremote.access"
+    mode: "0400"
+
+- name: Copy JMX control file 2
+  copy:
+    src: "dot.jmxremote.password"
+    dest: "{{ app_home_directory }}/.jmxremote.password"
+    mode: "0400"
+
+- name: Commenting out broadcast group in Master and Slave
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    regexp: '^      <broadcast-groups>'
+    replace: '      <!-- <broadcast-groups>'
+
+- name: Commenting out discovery group in Master and Slave
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    regexp: '^      </discovery-groups>'
+    replace: '      </discovery-groups> -->'
+
+- name: Commenting out discovery group ref in master and slave
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    regexp: '^            <discovery-group-ref discovery-group-name="dg-group1"/>'
+    replace: '            <!-- <discovery-group-ref discovery-group-name="dg-group1"/> -->'
+
+- name: Setting up users for Master and Slave
+  environment:
+    ARTEMIS_HOME: "{{ activemq_artemis_home }}"
+    JAVA_HOME: "{{ activemq_artemis_java_home }}"
+    BROKER_NAME: "{{ broker_name }}"
+  script: setup_users.sh
+
+- name: Commenting out old JAVA_ARGS for Master broker and Slave broker
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/artemis.profile"
+    regexp: '^JAVA_ARGS'
+    replace: "#JAVA_ARGS"
+
+- name: Setting up new JAVA_ARGS for Master broker and Slave broker
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/artemis.profile"
+    insertafter: '# Java Opts'
+    block: |
+       JAVA_ARGS="-Xms1024M -Xmx4096M ${GC_OPTS}"
+    marker: '#{mark} JAVA_ARGS Added by Ansible'
+
+- name: Adding GC_OPTS in Master and Slave
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/artemis.profile"
+    insertbefore: '# Java Opts'
+    block: |
+            GC_OPTS="-XX:+UseG1GC -Xloggc:${ARTEMIS_INSTANCE}/log/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime -XX:+PrintHeapAtGC -XX:+PrintPromotionFailure"
+    marker: '#{mark} GC_OPTS Added by Ansible'
+
+- name: Setting up logging for Master and Slave
+  template:
+    src: "logging.properties.j2"
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/logging.properties"
+    mode: "{{ file_permission }}"
+
+- name: updating HA-policy in Master
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    regexp: '<master/>'
+    replace: '<master>
+                   <cluster-name>my-cluster</cluster-name>
+                   <check-for-live-server>true</check-for-live-server>
+              </master>'
+  when: inventory_hostname not in "{{ groups['MQ_SLAVE'] }}"
+
+- name: updating HA-policy in Slave
+  replace:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    regexp: '<slave/>'
+    replace: '<slave>
+                 <cluster-name>my-cluster</cluster-name>
+                 <allow-failback>true</allow-failback>
+              </slave>'
+  when: inventory_hostname in "{{ groups['MQ_SLAVE'] }}"
+
+- name: Adding static connector in Master and Slave
+  blockinfile:
+    dest: "{{ app_home_directory }}/{{ broker_name }}/etc/broker.xml"
+    insertbefore: '         </cluster-connection>'
+    block: |
+                <static-connectors>
+                     <connector-ref>{{ connector_name }}-connector</connector-ref>
+                </static-connectors>
+    marker: "<!-- {{ connector_name }} connector Added by Ansible -->"
+  with_items: "{{ groups['MQ'] }}"
+  when: inventory_hostname != "{{ item }}"
+
+  
+  

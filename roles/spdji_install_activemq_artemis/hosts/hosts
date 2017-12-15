@@ -1,0 +1,12 @@
+[MQ_MASTER]
+#10.164.236.39   ansible_user=webutils
+10.164.242.158   ansible_user=webutils
+
+
+[MQ_SLAVE]
+#10.164.236.211   ansible_user=webutils
+10.164.242.214    ansible_user=webutils
+
+[MQ:children]
+MQ_MASTER
+MQ_SLAVE
