@@ -1,0 +1,9 @@
+software_directory: "{{ activemq_artemis_user_home_directory }}/software_temp"
+ansible_logs_directory: "{{ activemq_artemis_user_home_directory }}/ansible_logs"
+tools_directory: "{{ activemq_artemis_user_home_directory }}/tools"
+
+java_install_directory: "{{ activemq_artemis_user_home_directory }}/java"
+java_home: "{{ java_install_directory }}/jdk1.8.0_121"
+
+bash_profile_file: "{{ activemq_artemis_user_home_directory }}/.bash_profile"
+bashrc_file: "{{ activemq_artemis_user_home_directory }}/.bashrc"

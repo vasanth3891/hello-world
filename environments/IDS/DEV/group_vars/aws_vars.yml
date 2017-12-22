@@ -1,0 +1,27 @@
+# main.yml file under group-vars folder maintains the common variables
+# that can be used across different software installation
+
+# Common - START
+ids_app_user:                          "idsuser"
+ids_app_user_group:                     "idsgrp"
+ids_home_directory:                     "/local/apps/{{ ids_app_user }}"
+file_permission:                       "u=rwx,g=r,o=r"
+folder_permission:                     "u=rwx,g=rx,o=rx"
+bash_profile_file:                     "{{ ids_home_directory }}/.bash_profile"
+bashrc_file:                           "{{ ids_home_directory }}/.bashrc"
+tools_directory:                       "{{ ids_home_directory }}/tools"
+apps_directory:                        "{{ ids_home_directory }}/apps"
+software_directory:                    "{{ ids_home_directory }}/software_temp"
+ansible_logs_directory:                "{{ ids_home_directory }}/ansible_logs"
+wlst_log:                              "{{ ansible_logs_directory }}/wlst.log"
+wl_domain_log:                         "{{ ansible_logs_directory }}/wl_domain.log"
+domain_resource_log:                   "{{ ansible_logs_directory }}/domain_resource.log"
+domain_creation_log:                   "{{ ansible_logs_directory }}/domain_creation.log"
+common_log:                            "{{ ansible_logs_directory }}/common.log"
+wl_install_log:                        "{{ ansible_logs_directory }}/wl_install.log"
+deployment_log:                        "{{ ansible_logs_directory }}/deployment.log"
+# Common - END
+
+primary_server:                        "{{ hostvars[groups['primary_calc'][0]]['ansible_hostname'] }}"
+all_servers_in:                        "{{ primary_server }}"
+ids_env_name:                           "DEV"

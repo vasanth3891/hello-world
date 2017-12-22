@@ -1,0 +1,12 @@
+env_name: "DEV"
+primary_server: "{{ hostvars[groups['AWS'][0]]['ansible_hostname'] }}"
+admin_server_password: "admin2care"
+admin_server_port: "22601"
+local_managed_servers_port: "22611,22621"
+node_manager_password: "nm2care!"
+
+http_listen_port: "21110"
+https_listen_port: "21111"
+#http_server_name: "care2-dev.mhf.mhc"
+#http_weblogic_cluster: "NJ09MHF153:22611,NJ09MHF10154:22621"
+http_weblogic_cluster: "10.164.240.36:22611"

@@ -1,0 +1,5 @@
+app_user: "webutils"
+app_group: "webutils"
+app_user_home_directory: "/local/apps/{{ app_user }}"
+
+kafka_home_directory: "{{ app_user_home_directory }}/kafka"

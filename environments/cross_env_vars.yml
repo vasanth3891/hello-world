@@ -1,0 +1,174 @@
+# Common - START
+ids_app_user:                          "idsuser"
+ids_app_user_group:                     "idsgrp"
+ids_home_directory:                     "/local/apps/{{ ids_app_user }}"
+file_permission:                       "u=rwx,g=r,o=r"
+folder_permission:                     "u=rwx,g=rx,o=rx"
+bash_profile_file:                     "{{ ids_home_directory }}/.bash_profile"
+bashrc_file:                           "{{ ids_home_directory }}/.bashrc"
+tools_directory:                       "{{ ids_home_directory }}/tools"
+apps_directory:                        "{{ ids_home_directory }}/apps"
+software_directory:                    "{{ ids_home_directory }}/software_temp"
+ansible_logs_directory:                "{{ ids_home_directory }}/ansible_logs"
+wlst_log:                              "{{ ansible_logs_directory }}/wlst.log"
+wl_domain_log:                         "{{ ansible_logs_directory }}/wl_domain.log"
+domain_resource_log:                   "{{ ansible_logs_directory }}/domain_resource.log"
+domain_creation_log:                   "{{ ansible_logs_directory }}/domain_creation.log"
+common_log:                            "{{ ansible_logs_directory }}/common.log"
+wl_install_log:                        "{{ ansible_logs_directory }}/wl_install.log"
+deployment_log:                        "{{ ansible_logs_directory }}/deployment.log"
+# Common - END
+
+# Java - START
+jdk_file_name:                         "jdk-8u121-linux-x64.tar.gz"
+jdk_installer:                         "{{ software_directory }}/{{ jdk_file_name }}"
+ora_products_directory:                "{{ ids_home_directory }}/oracle/products"
+java_home:                             "{{ ora_products_directory }}/jdk1.8.0_121"
+java:                                  "{{ java_home }}/bin/java"
+java_security:                         "{{ java_home }}/jre/lib/security/java.security"
+securerandom_source:                   "file:/dev/./urandom"
+# Java - END
+
+# Ant - START
+ant_file_name:                         "apache-ant-1.10.1-bin.zip"
+ant_home:                              "{{ tools_directory }}/apache-ant-1.10.1"
+# Ant - END
+
+# Oracle Instant Client - START
+oracle_client_file_name:               "instantclient-basic-linux.x64-12.1.0.2.0.zip"
+oracle_client_home:                    "{{ ora_products_directory }}/instantclient_12_1"
+tns_admin:                             "{{ oracle_client_home }}/network/admin"
+tnsnames_ora_file:                     "{{ tns_admin }}/tnsnames.ora"
+# Oracle Instant Client - END
+
+# WebLogic Server - START
+weblogic_file_name:                    "fmw_12.2.1.2.0_wls.jar"
+weblogic_installer:                    "{{ software_directory }}/{{ weblogic_file_name }}"
+middleware_home:                       "{{ ora_products_directory }}/oracle_home"
+silent_install_file:                   "{{ software_directory }}/silent-weblogic.txt"
+ora_inst_loc:                          "{{ software_directory }}/oraInst.loc"
+oracle_inventory_home:                 "{{ ids_home_directory }}/ora_inventory"
+oracle_install_group:                  "{{ ids_app_user_group }}"
+weblogic_home:                         "{{ middleware_home }}/wlserver"
+wlst_sh:                               "{{ middleware_home }}/oracle_common/common/bin/wlst.sh"
+pack_sh:                               "{{ middleware_home }}/oracle_common/common/bin/pack.sh"
+unpack_sh:                             "{{ middleware_home }}/oracle_common/common/bin/unpack.sh"
+weblogic_tmp_location:                 "{{ ids_home_directory }}/tmp"
+#wlst_sh:                               "{{ weblogic_home }}/common/bin/wlst.sh"
+#pack_sh:                               "{{ weblogic_home }}/common/bin/pack.sh"
+#unpack_sh:                             "{{ weblogic_home }}/common/bin/unpack.sh"
+# WebLogic Server - END
+
+# WebLogic Domain - START
+domain_template:                       "{{ weblogic_home }}/common/templates/wls/wls.jar"
+domain_directory:                      "{{ ids_home_directory }}/oracle/config/domains"
+domain_name:                           "ids_domain"
+domain_home:                           "{{ domain_directory }}/{{ domain_name }}"
+cluster_name:                          "ids_cluster"
+create_domain_py_file:                 "{{ software_directory }}/create_domain.py"
+domain_template_file_name:             "{{ software_directory }}/{{ domain_name }}-template.jar"
+domain_logs:                           "{{ domain_home }}/logs"
+# WebLogic Domain - END
+
+# WebLogic Node Manager - START
+node_manager_home:                     "{{ domain_home }}/nodemanager"
+node_manager_username:                 "ids_nm"
+node_manager_password:                 "ids_nm12c"
+nm_enroll_py_file:                     "{{ software_directory }}/nm_enroll.py"
+nm_start_script_directory:             "{{ domain_home }}/bin"
+nm_start_script:                       "startNodeManager.sh"
+node_manager_listen_port:              "22199"
+# WebLogic Node Manager - END
+
+# WebLogic Admin Server - START
+admin_server_name:                     "ids_admin"
+admin_server_port:                     "32500"
+admin_server_user_name:                "system"
+admin_server_password:                 "ids_admin"
+admin_server_home:                     "{{ domain_home }}/servers/{{ admin_server_name }}"
+admin_server_security_directory:       "{{ admin_server_home }}/security"
+boot_properties_file:                  "{{ admin_server_security_directory }}/boot.properties"
+start_admin_server_py_file:            "{{ software_directory }}/start_admin_server.py"
+stop_admin_server_py_file:             "{{ software_directory }}/stop_admin_server.py"
+# WebLogic Admin Server - END
+
+# WebLogic Managed Server - START
+start_managed_server_py_file:          "{{ software_directory }}/start_managed_server.py"
+stop_managed_server_py_file:           "{{ software_directory }}/stop_managed_server.py"
+# WebLogic Managed Server - END
+
+# IDS WL Domain Configuration - START
+iis_properties_directory:              "{{ domain_home }}/iisproperties"
+update_wl_jvm_arg_sh_file:             "{{ software_directory }}/update_wl_jvm_arg.sh"
+create_wl_resource_py_file:            "{{ software_directory }}/create_wl_resource.py"
+wl_resource_file:                      "{{ software_directory }}/wl_objects.csv"
+# IDS WL Domain Configuration - END
+
+# Secure Password - START
+secure_pwd_home:                       "{{ apps_directory }}/.DB"
+secure_pwd_file:                       "{{ secure_pwd_home }}/secure_passwords.properties"
+# Secure Password - END
+
+# New Infrastrusture Processes - START
+new_infra_process_home:                "{{ ids_home_directory }}/application"
+new_infra_process_backup:              "{{ ids_home_directory }}/application_backup"
+# New Infrastrusture Processes - END
+
+# Scripts - START
+scripts_home:                          "{{ ids_home_directory }}/scripts"
+scripts_logs:                          "{{ scripts_home }}/logs"
+# Scripts - END
+
+# Log - START
+log_home:                              "{{ ids_home_directory }}/logs"
+log_backup_home:                       "{{ ids_home_directory }}/logbackup"
+log_weblogic:                          "{{ log_home }}/weblogic"
+log_wl_application:                    "{{ log_weblogic }}/application"
+log_wl_server:                         "{{ log_weblogic }}/server"
+log_calc_scheduler:                    "{{ log_home }}/calc_scheduler"
+log_marketdata:                        "{{ log_home }}/marketdata"
+log_exception_monitor:                 "{{ log_home }}/exception_monitor"
+log_deployment:                        "{{ log_home }}/deployment"
+log_scripts:                           "{{ log_home }}/scripts"
+# Log - END
+
+#Solr - START
+solr_user:                              idsuser
+solr_workspace:                         "/local/apps/{{ solr_user }}"
+solr_create_user:                       false
+solr_version:                           "6.3.0"
+solr_filename:                          "solr-{{ solr_version }}"
+solr_remove_cruft:                      false
+solr_service_name:                      solr
+solr_install_dir:                       "{{ solr_workspace }}"
+solr_install_path:                      "{{ solr_workspace  }}/{{ solr_version }}"
+solr_home:                              "{{ software_directory }}/{{ solr_filename }}"
+solr_port:                              "8983"
+solr_xms:                               "256M"
+solr_xmx:                               "512M"
+solr_timezone:                          "UTC"
+solr_cores:
+       - spindices
+       - adminconsole
+       - spice2
+       - spade
+solr_config_file:                       "{{ solr_workspace }}/{{ solr_filename }}"
+# Used only for Solr < 5.
+solr_log_file_path:                     "{{ ansible_logs_directory }}/solr.log"
+solr_host:                              "0.0.0.0"
+#Solr - END
+
+#JASYPT - Start
+jasypt_file_name:                      "jasypt-1.9.2.zip"
+jasypt_home:                           "{{ software_directory }}/jasypt-1.9.2"
+#JASYPT - End
+
+#MAVEN - Start
+maven_file_name:                        "apache-maven-2.2.1.zip"
+maven_home:                             "{{ tools_directory }}/apache-maven-2.2.1"
+#MAVEN - End
+
+#Zoo Keeper - START
+zookeeper_version:                      "zookeeper-3.4.9"
+zookeeper_bin_folder:                   "zookeeper-3.4.9/bin"
+#Zoo Keeper - END

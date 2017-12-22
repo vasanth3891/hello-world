@@ -1,0 +1,66 @@
+app_user: "care"
+app_group: "care"
+
+#app_user: "webutils"
+#app_group: "webutils"
+
+#app_user_home_directory: "/local/apps/{{ app_user }}"
+app_user_home_directory: "/home/{{ app_user }}"
+
+software_directory: "{{ app_user_home_directory }}/software_temp"
+ansible_logs_directory: "{{ app_user_home_directory }}/ansible_logs"
+tools_directory: "{{ app_user_home_directory }}/tools"
+
+bash_profile_file: "{{ app_user_home_directory }}/.bash_profile"
+bashrc_file: "{{ app_user_home_directory }}/.bashrc"
+
+java_install_directory: "{{ app_user_home_directory }}/java"
+java_home: "{{ java_install_directory }}/jdk1.8.0_121"
+
+middleware_home: "{{ app_user_home_directory }}/weblogic"
+oracle_inventory_home: "{{ app_user_home_directory }}/oraInventory"
+weblogic_tmp_location: "{{ app_user_home_directory }}/tmp"
+oracle_install_group: "{{ app_group }}"
+
+domain_directory: "{{ app_user_home_directory }}"
+domain_name: "care2_domain"
+admin_server_user_name: "care2admin"
+admin_server_name: "CareAdminServer"
+admin_server_url: "http://{{ primary_server }}:{{ admin_server_port }}"
+admin_server_control_url: "t3://{{ primary_server }}:{{ admin_server_port }}"
+#admin_server_url: "http://aws-dev-priv-app-use1a-36:{{ admin_server_port }}"
+#admin_server_control_url: "t3://aws-dev-priv-app-use1a-36:{{ admin_server_port }}"
+local_managed_servers_name: "care_mserver1,care_mserver2"
+primary_server_nm_port: "22399"
+secondary_server_nm_port: "22399"
+cluster_name: "care_cluster"
+node_manager_username: "care_nm"
+
+wl_server_memory_arg: "-Xms256m -Xmx8192m  -XX:MaxPermSize=256m"
+unix_machines: "aws-dev-priv-app-use1a-36,aws-dev-priv-app-use1a-95"
+
+care_home: "{{ app_user_home_directory }}"
+bin_directory: "{{ app_user_home_directory }}/bin"
+start_admin_server_py_file: "{{ bin_directory }}/start_admin_server.py"
+stop_admin_server_py_file: "{{ bin_directory }}/stop_admin_server.py"
+start_managed_server_py_file: "{{ bin_directory }}/start_managed_server.py"
+stop_managed_server_py_file: "{{ bin_directory }}/stop_managed_server.py"
+
+http_server_root: "{{ app_user_home_directory }}/care2"
+http_htdocs_directory: "{{ http_server_root }}/htdocs"
+http_conf_directory: "{{ http_server_root }}/conf"
+http_ssl_directory: "{{ http_conf_directory }}/ssl"
+http_logs_directory: "{{ http_server_root }}/logs"
+http_wl_logs_directory: "{{ http_server_root }}/wl_logs"
+http_modules_directory: "{{ http_server_root }}/modules"
+lib_directory: "{{ app_user_home_directory }}/lib"
+
+http_home: "/usr/local/apache2"
+http_server_admin: "sharath.srinivas@spglobal.com"
+#http_rotatelogs_path: "/usr/sbin/rotatelogs"
+#httpd_executable: "/usr/sbin/httpd"
+http_rotatelogs_path: "{{ http_home }}/bin/rotatelogs"
+httpd_executable: "{{ http_home }}/bin/httpd"
+
+webgate_11g_binaries_directory: "{{ app_user_home_directory }}/webgate"
+webgate_11g_home_directory: "{{ webgate_11g_binaries_directory }}/home"
