@@ -1,0 +1,237 @@
+- name: Create required directories
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: "{{folder_permission}}"
+  when: not(("{{item}}" is undefined) or ("{{item}}" is none) or("{{item}}" | trim==''))
+  with_items:
+    - "{{RServer_dir}}"
+    - "{{build_dir}}"
+    - "{{package_dir}}"
+    - "{{tmp_dir}}"
+    - "{{downloads_dir}}"
+
+- name: Install fortran compiler
+  become: yes
+  yum:
+    name:  "{{item}}"
+    state: present
+    enablerepo: artifactory
+  with_items:
+    - gcc-gfortran
+    - texinfo
+  # - texinfo-tex
+  #   tags: insTex
+
+- name: Install openssl-devel dependency file
+  become: yes
+  yum:
+    name: openssl-devel.x86_64
+    state: present
+    enablerepo: artifactory
+  tags: openssldevel
+
+- name: Install libcurl-devel dependency file
+  become: yes
+  yum:
+    name: libcurl-devel
+    state: present
+    enablerepo: artifactory
+  tags: curldevel
+
+
+#- name: Extract libX11 dependency file
+##  unarchive:
+##    src: "{{libX11_file_name}}"
+##    dest: "{{package_dir}}"
+##  when: readline_install | success
+#
+##- name: Install libX11 dependency file
+##  shell: "{{item}}"
+##  become: yes
+##  args:
+##    chdir: "{{libX11_dir}}"
+##  with_items:
+##   - ./configure
+##   - make clean
+##   - make
+##   - make install
+##  register: libX11_install
+
+
+- name: Download R installation packages
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ downloads_dir }}"
+    mode: 0755
+  with_items:
+       - "{{ ncurses_download_url }}"
+       - "{{ readline_download_url }}"
+       - "{{ openssl_download_url }}"
+       - "{{ zlib_download_url }}"
+       - "{{ bzip_download_url }}"
+       - "{{ libzlma_download_url }}"
+       - "{{ pcre_download_url }}"
+       - "{{ curl_download_url }}"
+       - "{{ r_download_url }}"
+
+#Extracting R packages from local host
+- name: Extracting Downlaoded R Packages
+  unarchive:
+       src: "{{ downloads_dir }}/{{ item }}"
+       dest: "{{ package_dir }}"
+       remote_src: yes
+  with_items:
+      - "{{ ncurses_file_name }}"
+      - "{{ readline_file_name }}"
+      - "{{ openssl_file_name }}"
+      - "{{ zlib_file_name }}"
+      - "{{ bzip_file_name }}"
+      - "{{ liblzma_file_name }}"
+      - "{{ pcre_file_name }}"
+      - "{{ curl_file_name }}"
+  register: Rpackages_Extracted
+
+#Extracting R-3.3.3 from local host
+- name: Extracting R-3.3.3 package
+  unarchive:
+       src: "{{ downloads_dir }}/{{ r_file_name }}"
+       dest: "{{ RServer_dir }}"
+       remote_src: yes
+  when: Rpackages_Extracted | success
+
+- name: Setting paths in bashrc
+  blockinfile:
+    dest: "{{bashr_file}}"
+    block: |
+        export LD_LIBRARY_PATH=$HOME/RServer/packages/lib:$LD_LIBRARY_PATH
+
+        export CFLAGS="-I$HOME/RServer/packages/include"
+
+        export LDFLAGS="-L$HOME/RServer/packages/lib"
+
+        export PKG_CONFIG_PATH=$HOME/RServer/packages/lib/pkgconfig:$PKG_CONFIG_PATH
+
+        export SSL_LDFLAGS="-L$HOME/RServer/packages/lib"
+
+        export SSL_CPPFLAGS="-I$HOME/RServer/packages/include"
+
+        export TMPDIR="$HOME/RServer/tmp"
+
+    marker: "# {mark} R install var paths"
+  when: Rpackages_Extracted | success
+
+- name: Source Bashrc
+  command: sh .bashrc
+  args:
+    chdir: "{{ user_home_directory }}"
+
+- name: Install ncurses dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{ncurses_dir}}"
+  with_items:
+    - ./configure --prefix="{{package_info}}"
+    - make clean
+    - make
+    - make install
+  register: ncurses_install
+
+- name: Install readline dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{readline_dir}}"
+  with_items:
+    - ./configure --prefix="{{package_info}}"
+    - make clean
+    - make
+    - make install
+  register: readline_install
+
+- name: Install openssl dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{openssl_dir}}"
+  with_items:
+    - ./config -Wl,-rpath="{{package_info}}/lib" -fPIC shared --prefix="{{package_info}}" --openssldir="{{package_info}}"
+    - make
+    - make install
+  register: openssl_install
+  tags: openssl_tag
+
+- name: Install Zlib dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{zlib_dir}}"
+  with_items:
+    - prefix="{{package_info}}" CFLAGS="-I$HOME/RServer/packages/include" LDFLAGS="-L$HOME/RServer/packages/lib" ./configure  --includedir="{{package_info}}/include" --libdir="{{package_info}}/lib"
+    - make
+    - make install
+  register: zlib_install
+
+- name: Install bzip dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{bzip_dir}}"
+  with_items:
+    - make -f Makefile-libbz2_so
+    - make
+    - make install PREFIX="{{package_info}}"
+  register: bzip_install
+
+- name: Install liblzma dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{liblzma_dir}}"
+  with_items:
+    - ./configure --prefix="{{package_info}}"
+    - make -j3
+    - make install
+  register: liblzma_install
+
+- name: Install pcre dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{pcre_dir}}"
+  with_items:
+    - ./configure --enable-utf8 --prefix="{{package_info}}"
+    - make -j3
+    - make install
+  register: pcre_install
+
+- name: Install curl dependency file
+  shell: "{{item}}"
+  args:
+    chdir: "{{curl_dir}}"
+  with_items:
+    - ./configure --prefix="{{package_info}}" CFLAGS="-I$HOME/RServer/packages/include" LDFLAGS="-L$HOME/RServer/packages/lib" PKG_CONFIG_PATH="$HOME/RServer/packages/lib/pkgconfig" LD_LIBRARY_PATH="$HOME/RServer/packages/lib" SSL_LIBS="-lssl -lcrypto" SSL_LDFLAGS="-L$HOME/RServer/packages/lib" SSL_CPPFLAGS="-I$HOME/RServer/packages/include"
+    - make -j3
+    - make install
+  register: curl_install
+  tags: curl_tag
+
+- name: Install R Server
+  shell: "{{item}}"
+  args:
+    chdir: "{{R_dir}}"
+  with_items:
+    - ./configure --prefix=$HOME/RServer/R-3.3.3_build CFLAGS="-I$HOME/RServer/packages/include" CPPFLAGS="-I$HOME/RServer/packages/include" LDFLAGS="-L$HOME/RServer/packages/lib" PKG_CONFIG_PATH="$HOME/RServer/packages/lib/pkgconfig" LD_LIBRARY_PATH="$HOME/RServer/packages/lib" SSL_LIBS="$HOME/RServer/packages/lib -lssl -lcrypto" SSL_LDFLAGS="-L$HOME/RServer/packages/lib" SSL_CPPFLAGS="-I$HOME/RServer/packages/include" '--with-cairo' '--with-jpeglib' '--with-readline=no' '--with-tcltk' '--with-blas' '--with-lapack' '--enable-R-profiling' '--enable-R-shlib' '--enable-memory-profiling' '--with-x=no'
+    -  make -j3 PREFIX=$HOME/RServer/R-3.3.3_build
+    -  make install PREFIX=$HOME/RServer/R-3.3.3_build
+
+- name: Changing File Permissions to 755 recursively
+  file:
+    path: "{{user_home_directory}}/RServer/R-3.3.3_build"
+    mode: "{{ folder_permission }}"
+    recurse: yes
+
+#- name: Add R Server installation directory to path
+#  lineinfile:
+#    dest: "{{bashrc_file}}"
+#    regexp: '^PATH>'
+#    line: "export PATH=$HOME/RServer/R-3.3.3/bin:$PATH"
+
+#- name: Source Bashrc for R
+#  command: sh .bash_profile
+#  args:
+#    chdir: /local/apps/ids
