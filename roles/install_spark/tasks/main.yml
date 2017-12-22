@@ -1,0 +1,88 @@
+---
+# tasks file for install_spark
+- name: Create required directories for JDK installation
+  file:
+    path:  "{{ item }}"
+    state: directory
+    mode:  "{{ folder_permission }}"
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    - "{{ spark_directory }}"
+    - "{{ spark_daemon_dir }}"
+    - "{{ downloads_dir }}"
+
+- name: Downloading spark-2.2.0-bin-hadoop2.6.tgz and scala-2.11.8.tgz
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ downloads_dir }}"
+    mode: "{{ folder_permission }}"
+  with_items:
+      - "{{ spark_download_url }}"
+      - "{{ scala_download_url }}"
+
+- name: Extracting scala-2.11.8.tgz
+  unarchive:
+      src: "{{ downloads_dir }}/{{ scala_filename }}"
+      dest: "{{ ids_home_directory }}"
+      remote_src: yes
+      creates: "{{ scala_home }}"
+  register: scala_installed
+- name: Setting paths in bashrc
+  blockinfile:
+    dest: "{{ bashrc_file }}"
+    block: |
+        export SCALA_HOME=/local/apps/webutils/scala-2.11.8
+        export PATH=/local/apps/webutils/scala-2.11.8/bin:$PATH
+    marker: "# {mark} Scala var paths"
+  when: scala_installed | success
+
+- name: Source Bashrc
+  command: sh .bashrc
+  args:
+      chdir: "{{ ids_home_directory }}"
+
+- name: Extracting spark-2.2.0-bin-hadoop2.6.tgz
+  unarchive:
+      src: "{{ downloads_dir }}/{{ spark_filename }}"
+      dest: "{{ spark_directory }}"
+      remote_src: yes
+      creates: "{{ spark_home }}"
+  register: spark_installed
+
+- name: Add Spark path and  create Spark home alias
+  blockinfile:
+    dest: "{{ bashrc_file }}"
+    block: |
+      export PS1='#$PWD>'
+      export PATH=$PATH:/local/apps/webutils/Spark/spark-2.2.0-bin-hadoop2.6/bin:/local/apps/webutils/Spark/spark-2.2.0-bin-hadoop2.6/sbin
+      export SPARK_HOME=/local/apps/webutils/Spark/spark-2.2.0-bin-hadoop2.6
+    marker: "# {mark} ANSIBLE - Add Spark home to path"
+  when: spark_installed | success
+
+- name: Source Bashrc
+  command: sh .bashrc
+  args:
+      chdir: "{{ ids_home_directory }}"
+      
+- name: Copying Spark_daemon scripts
+  copy:
+     src: "{{ item }}"
+     dest: "{{ spark_daemon_dir }}"
+     mode: "{{ file_permission }}"
+  with_items:
+        - "{{ launch_spark_file_name }}"
+        - "{{ copy_spark_daemon_file_name }}"
+        - "{{ restart_spark_daemon_file_name }}"
+        - "{{ start_spark_daemon_file_name }}"
+        - "{{ stop_spark_file_name }}"
+        - "{{ advance_analytics_SNAPSHOT_file_name }}"
+
+- name: launching spark on master
+  command: sh "{{sbin_dir}}/start-master.sh" {{item}}
+  with_items:
+         - -i {{ inventory_hostname}} -p 7077 --webui-port 8081
+
+- name: launching spark on slave
+  command: sh "{{sbin_dir}}/start-slave.sh" {{item}}
+  with_items:
+         - -i {{ inventory_hostname}} -p 7078 --webui-port 8082 spark://{{ inventory_hostname }}:7077

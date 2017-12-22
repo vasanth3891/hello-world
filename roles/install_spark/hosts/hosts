@@ -1,0 +1,5 @@
+[spark]
+#10.164.241.105          ansible_user=ids
+
+[spark_hosts]
+10.164.242.115		ansible_user=webutils
