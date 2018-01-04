@@ -1,0 +1,123 @@
+
+- name: Create Rserver deployment  directories
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: "{{folder_permission}}"
+  when: not(("{{item}}" is undefined) or ("{{item}}" is none) or("{{item}}" | trim==''))
+  with_items:
+    - "{{rdaemon_dir}}"
+    - "{{rlibrary_dir}}"
+ #  - "{{tmp_dir}}"
+
+- name: Downloading R Deployment packages
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ rlibrary_dir }}"
+    mode: "{{ folder_permission }}"
+  with_items:
+        - "{{ Rserve_download_url }}"
+        - "{{ timeDate_download_url }}"
+        - "{{ timeSeries_download_url }}"
+        - "{{ gss_download_url }}"
+        - "{{ stabledist_download_url }}"
+        - "{{ fBasics_download_url }}"
+        - "{{ Runiversal_download_url }}"
+        - "{{ zoo_download_url }}"
+        - "{{ xts_download_url }}"
+        - "{{ PerformanceAnalytics_download_url }}"
+
+- name: copying R library packages to R libarary dest
+  copy:
+    src: "{{ item }}"
+    dest: "{{ rlibrary_dir }}"
+    mode: "{{ folder_permission }}"
+  with_items:
+      - "{{Basic_file_name}}"
+      - "{{Summary_file_name}}"
+      - "{{FSA_file_name}}"
+
+- name: Copying R deploy scripts
+  copy:
+     src: "{{ item }}"
+     dest: "{{ rdaemon_dir }}"
+     mode: "{{ folder_permission }}"
+  with_items:
+      - "{{ start_rserve_daemon_file_name }}"
+      - "{{ stop_rserve_daemon_file_name  }}"
+      - "{{ deploy_rserver_file_name }}"
+  register: deployscriptcopied
+
+#- name: Source Bashrc
+#  command: sh .bashrc
+#  args:
+#    chdir: /local/apps/ids
+
+- name: Setting temp variable paths in .bashrc
+  blockinfile:
+    dest: "{{bashr_file}}"
+    block: |
+      export TMPDIR="$HOME/RServer/tmp"
+
+      export R_LIBS="$HOME/RServer/R-3.3.3_build/lib64/R/library"
+    marker: "# {mark} deployment var paths"
+  when: deployscriptcopied|success
+
+- name: Source Bashrc
+  command: sh .bashrc
+  args:
+    chdir: "{{ user_home_directory }}"
+
+################### To install libraries through shell script########
+
+#- name: Deploying R libraries
+#  shell: "{{item}}"
+#  args:
+#    chdir: "{{rdaemon_dir}}"
+#  with_items:
+#     - ./deploy_rserver.sh
+
+##################################################################
+
+- name: Installing R-Libraries
+  command: $HOME/RServer/R-3.3.3_build/lib64/R/bin/Rscript --no-save  -e 'install.packages("{{rlibrary_dir}}/{{item}}", repos=NULL,type="source")'
+  with_items:
+      - "{{Rserve_file_name}}"
+      - "{{timeDate_file_name}}"
+      - "{{timeSeries_file_name}}"
+      - "{{gss_file_name}}"
+      - "{{stabledist_file_name}}"
+      - "{{fBasics_file_name}}"
+      - "{{Runiversal_file_name}}"
+      - "{{zoo_file_name}}"
+      - "{{xts_file_name}}"
+      - "{{PerformanceAnalytics_file_name}}"
+      - "{{Basic_file_name}}"
+      - "{{Summary_file_name}}"
+      - "{{FSA_file_name}}"
+
+- name: Copying Rserv.conf
+  copy:
+     src: "{{Rservconf_file_name}}"
+     dest: "{{Rservconf_dir}}"
+     mode: "{{ folder_permission }}"
+
+- name: Configure start_rserve_daemon.sh
+  shell: "{{item}}"
+  args:
+    chdir: "{{rdaemon_dir}}"
+  with_items:
+      - ./start_rserve_daemon.sh
+
+#- name: Configure stop_rserve_daemon.sh
+#  shell: "{{item}}"
+#  args:
+#    chdir: "{{rdaemon_dir}}"
+#  with_items:
+#      - ./stop_rserve_daemon.sh
+
+############# removing installed libraries in R manually ####################
+#             remove.packages(c("FSA","Summary","Basic","PerformanceAnalytics","xts","zoo","Runiversal","fBasics","stabledist","gss","timeSeries","timeDate","Rserve"),lib = "/local/apps/ids/RServer/R-3.3.3_build/lib64/R/library")
+################################
+
+
