@@ -1,0 +1,60 @@
+- name: Print info
+  debug:
+    msg: "This will install Java in {{ java_install_directory }} creating {{ java_home }}"
+
+- name: Create required directories for JDK installation
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode:  "{{ folder_permission }}"
+  when: not(("{{item}}" is undefined) or ("{{item}}" is none) or ("{{item}}" | trim==''))
+  with_items:
+    - "{{ java_install_directory }}"
+    - "{{ downloads_dir }}"
+
+#- name: Extract JDK archive {{jdk_file_name }} into {{ java_install_directory}}
+#  unarchive:
+#    src: "{{ jdk_file_name }}"
+#    dest: "{{ java_install_directory }}"
+#    creates: "{{ java_home }}"
+#  register: jdk_installed
+
+- name: Downloading Java jdk1.8.0_121
+  get_url:
+    url: "{{ java_url }}"
+    dest: "{{ downloads_dir }}"
+    mode: "{{ folder_permission }}"
+
+- name: Extracting java jdk1.8.0_121
+  unarchive:
+       src: "{{ downloads_dir }}/{{ jdk_file_name }}"
+       dest: "{{ java_install_directory }}"
+       creates: "{{ java_home }}"
+       remote_src: yes
+  register: jdk_Extracted
+
+- name: Set entropy gathering device
+  replace:
+    dest: "{{java_security}}"
+    regexp: '^securerandom\.source=file:/dev/random'
+    replace: "securerandom.source={{ securerandom_source }}"
+  when: jdk_Extracted|success
+
+- name: Add Java home to path
+  blockinfile:
+    dest: "{{ bash_profile_file }}"
+    insertbefore: "export PATH"
+    block: |
+      export PS1='#$PWD>'
+      export JAVA_HOME={{ java_home }}
+      PATH=${JAVA_HOME}/bin:${PATH}
+    marker: "# {mark} ANSIBLE - Add Java home to path"
+  when: jdk_Extracted|success
+
+- name: Create Java home alias
+  blockinfile:
+    dest: "{{ bashrc_file }}"
+    block: |
+      alias javahome="cd {{ java_home }}; pwd"
+    marker: "# {mark} ANSIBLE - Add Java home"
+  when: jdk_Extracted|success
